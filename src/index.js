@@ -1,5 +1,4 @@
 const express = require('express')
-const expressSession = require('express-session')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const helmet = require('helmet')
@@ -20,9 +19,6 @@ let app = express()
     .use(cookieParser())
     .use(helmet())
     .use(cors())
-    .use(expressSession({
-        secret: "iamapassword"
-    }))
 
 app.post("/login", (req, res) => {
     let username = req.body.username
