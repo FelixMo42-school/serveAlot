@@ -24,9 +24,13 @@ var app = express()
 app.post("/login", (req, res) => {
     if (req.body.username == "admin" && req.body.password == "123") {
         res.cookie('logedIn' , true)
-        res.redirect("/home.html")
+        res.send({
+            success: true
+        })
     } else {
-        res.redirect("/login.html")
+        res.send({
+            success: false
+        })
     }
 })
 
