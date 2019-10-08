@@ -1,3 +1,5 @@
+'use strict'
+
 const express      = require('express')
 const bodyParser   = require('body-parser')
 const cookieParser = require('cookie-parser')
@@ -56,8 +58,52 @@ app.post("/login", (req, res) => {
     })
 })
 
-app.get("/secret", (req, res) => {
-    jwt.verify()
+app.post("/logout", (req, res) => {
+    let token = req.cookies.session
+
+    jwt.verify( token, secret, (err, data) => {
+        if (err) {
+            res.status(500)
+            return res.send(err)
+        }
+
+        let user = users.find((user) =>
+            user.uid == data.uid
+        )
+
+        if (!user) {
+            return res.send("no user")
+        }
+
+        delete user.uid
+
+        res.send({})
+    })
+    res.clearCookie()
+})
+
+app.get("/username", (req, res) => {
+    let token = req.cookies.session
+
+    jwt.verify( token, secret, (err, data) => {
+        if (err) {
+            res.status(500)
+            return res.send(err)
+        }
+
+        let user = users.find((user) =>
+            user.uid == data.uid
+        )
+
+        if (!user) {
+            res.status(500)
+            return res.send("no user")
+        }
+
+        res.send( {
+            username: user.username
+        } )
+    } )
 })
 
 app.listen(port)
