@@ -7,9 +7,12 @@ const cors = require('cors')
 
 const port = 3000
 
-var data = {name: "bla"}
+let users = [
+    {username: "admin", password: "123"},
+    {username: "guest", password: "guest"}
+]
 
-var app = express()
+let app = express()
     .set('view engine', 'ejs')
     .use(express.static('public'))
     .use(bodyParser.json({}))
@@ -22,7 +25,10 @@ var app = express()
     }))
 
 app.post("/login", (req, res) => {
-    if (req.body.username == "admin" && req.body.password == "123") {
+    let username = req.body.username
+    let password = req.body.password
+
+    if ( users.find((user) => user.username == username && user.password == password) ) {
         res.cookie('logedIn' , true)
         res.send({
             success: true
