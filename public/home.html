@@ -2,6 +2,13 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+        <style>
+            .container {
+                margin-top: 16px;
+                margin-bottom: 16px;                
+            }
+        </style>
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
@@ -33,7 +40,7 @@
                         $("#msg").html(`Welcome ${data.username}`)
                         $("#login").hide()
                     } else {
-                        $("#msg").html(`Youre not logged in!`)
+                        $("#msg").html(data.err)
                         $("#logout").hide()
                     }
 

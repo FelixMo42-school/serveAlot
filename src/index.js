@@ -125,30 +125,44 @@ app.get("/logout", (req, res) => {
     })
 })
 
-app.get("/username", (req, res) => {
-    let token = req.cookies.session
+function auth() {
+    return (req, res, next) => {
+        let token = req.cookies.session
 
-    jwt.verify(token, secret, (err, data) => {
-        if (err) {
+        if (!token) {
             return res.send({
-                err: err
+                err: "must be loged in"
             })
         }
 
-        let user = users.find((user) =>
-            user.uid == data.uid
-        )
+        jwt.verify(token, secret, (err, data) => {
+            if (err) {
+                return res.send({
+                    err: err
+                })
+            }
 
-        if (!user) {
-            return res.send({
-                err: "no user"
-            })
-        }
+            let user = users.find((user) =>
+                user.uid == data.uid
+            )
 
-        res.send({
-            username: user.username
+            if (!user) {
+                return res.send({
+                    err: "not logged in"
+                })
+            }
+
+            req.user = user
+
+            next()
         })
-    } )
+    }
+}
+
+app.get("/username", auth(), (req, res) => {
+    res.send({
+        username: req.user.username
+    })
 })
 
 app.listen(port)
