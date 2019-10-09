@@ -2,40 +2,90 @@
     <head>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+        <style>
+            .container {
+                margin-top: 16px;
+                margin-bottom: 16px;                
+            }
+        </style>
     </head>
     <body>
-        <div class="jumbotron">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
             <div class="container">
-                <h1>> Log in</h1>
+                <a class="navbar-brand" href="#">> LOG IN</a>
+
+                <ul class="nav">
+                </ul>
             </div>
-        </div>
+        </nav>
 
         <div class="container">
             <div id="loginAlert" class="alert alert-danger" role="alert">
-                Incorrect Username or Password.
-                <button type="button" class="close" onclick="$('#loginAlert').fadeOut()">
+                <span id="msg"></span>
+                <button
+                    type="button"
+                    class="close"
+                    onclick="$('#loginAlert').fadeOut()"
+                >
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
         </div>
 
-        <div class="container">
+        <div class="container login">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Enter Username" />
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    class="form-control"
+                    placeholder="Enter Username"
+                    required
+                />
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" />
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Enter password"
+                    required
+                />
             </div>
             
             <div class="form-group">
                 <input type="button" value="log in" onclick="login()"/>
+                OR
+                <input type="button" value="register" onclick="register()"/>
             </div>
         </div>
 
         <script>
             $("#loginAlert").hide()
+
+            function register() {
+                $.ajax({
+                    url: "/register",
+                    type: "POST",
+                    dataType: "json",
+                    data: {
+                        username: $("#username").val(),
+                        password: $("#password").val()
+                    },
+                    success: (data) => {
+                        if (data.success) {
+                            window.location.href = "./home.html"
+                        } else {
+                            $('#msg').html(data.err)
+                            $("#loginAlert").fadeIn()
+                        }
+                    }
+                })
+            }
 
             function login() {
                 $.ajax({
@@ -43,14 +93,14 @@
                     type: "POST",
                     dataType: "json",
                     data: {
-                        username: document.getElementById("username").value,
-                        password: document.getElementById("password").value
+                        username: $("#username").val(),
+                        password: $("#password").val()
                     },
                     success: (data) => {
                         if (data.success) {
                             window.location.href = "./home.html"
                         } else {
-                            console.log(data)
+                            $('#msg').html(data.err)
                             $("#loginAlert").fadeIn()
                         }
                     }

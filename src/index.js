@@ -6,10 +6,11 @@ const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const cors         = require('cors')
 const jwt          = require('jsonwebtoken')
+const bcrypt       = require('bcrypt')
 const uuid         = require("uuid/v4")
 
 const port = 3000
-
+const saltRounds = 10
 const secret = "secret"
 
 const app = express()
@@ -21,33 +22,40 @@ const app = express()
     .use(helmet())
     .use(cors())
 
-let users = [
-    {username: "admin", password: "123", secret: "admin secret"},
-    {username: "guest", password: "guest", secret: "guest secret"}
-]
+const users = []
 
-app.post("/login", (req, res) => {
+app.post("/login", async (req, res) => {
     let username = req.body.username
     let password = req.body.password
 
-    let user = users.find((user) =>
-        user.username == username && user.password == password
-    )
-
-    if ( !user ) {
-        res.send({
-            success: false
+    if ( typeof username != "string" || typeof password != "string" ) {
+        return res.send({
+            success: false,
+            err: "requires username and password"
         })
     }
 
-    //TODO: what if allready uid
+    let user = users.find((user) => user.username == username)
+
+    if ( !user ) {
+        return res.send({
+            success: false,
+            err: "invalid username"
+        })
+    }
+
+    let match = await bcrypt.compare(password, user.password)
+
+    if ( !match ) {
+        return res.send({
+            success: false,
+            err: "wrong password"
+        })
+    }
 
     user.uid = uuid()
 
-    let data = {
-        uid: user.uid,
-        username: username
-    }
+    let data = { uid: user.uid }
 
     let token = jwt.sign(data, secret, { expiresIn: "1h" })
 
@@ -58,13 +66,48 @@ app.post("/login", (req, res) => {
     })
 })
 
-app.post("/logout", (req, res) => {
+app.post("/register", async (req, res) => {
+    let username = req.body.username
+    let password = req.body.password
+
+    if ( typeof username != "string" || typeof password != "string" ) {
+        return res.send({
+            success: false,
+            err: "requires username and password"
+        })
+    }
+
+    if ( users.find((user) => user.username == username) ) {
+        return res.send({
+            success: false,
+            err: "username allready taken"
+        })
+    }
+
+    let user = {
+        username: username,
+        password: await bcrypt.hash(password, saltRounds),
+        uid: uuid()
+    }
+
+    users.push(user)
+
+    let data = { uid: user.uid }
+
+    let token = jwt.sign(data, secret, { expiresIn: "1h" })
+
+    res.cookie('session', token)
+    res.send({
+        success: true
+    })
+})
+
+app.get("/logout", (req, res) => {
     let token = req.cookies.session
 
     jwt.verify( token, secret, (err, data) => {
         if (err) {
-            res.status(500)
-            return res.send(err)
+            return res.redirect("/home.html")
         }
 
         let user = users.find((user) =>
@@ -72,23 +115,24 @@ app.post("/logout", (req, res) => {
         )
 
         if (!user) {
-            return res.send("no user")
+            return res.redirect("/home.html")
         }
 
         delete user.uid
 
-        res.send({})
+        res.redirect("/home.html")
+        res.clearCookie()
     })
-    res.clearCookie()
 })
 
 app.get("/username", (req, res) => {
     let token = req.cookies.session
 
-    jwt.verify( token, secret, (err, data) => {
+    jwt.verify(token, secret, (err, data) => {
         if (err) {
-            res.status(500)
-            return res.send(err)
+            return res.send({
+                err: err
+            })
         }
 
         let user = users.find((user) =>
@@ -96,13 +140,14 @@ app.get("/username", (req, res) => {
         )
 
         if (!user) {
-            res.status(500)
-            return res.send("no user")
+            return res.send({
+                err: "no user"
+            })
         }
 
-        res.send( {
+        res.send({
             username: user.username
-        } )
+        })
     } )
 })
 

@@ -4,15 +4,23 @@
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     </head>
     <body>
-        <div class="jumbotron">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
             <div class="container">
-                <h1>> Home</h1>
+                <a class="navbar-brand" href="#">> HOME</a>
+
+                <ul class="nav">
+                    <li class="nav-item" id="login">
+                        <a href="/login.html">login</a>
+                    </li>
+                    <li class="nav-item" id="logout">
+                        <a href="/logout">logout</a>
+                    </li>
+                </ul>
             </div>
-        </div>
+        </nav>
 
         <div class="container">
-            <h3 id="name"></h3>
-            <input type="button" value="logout" onclick="logout()" />
+            <h3 id="msg"></h3>
         </div>
 
         <script>
@@ -21,7 +29,15 @@
                 type: "GET",
                 dataType: "json",
                 success: (data) => {
-                    $("#name").html(`Welcome ${data.username}`);
+                    if (data.username) {
+                        $("#msg").html(`Welcome ${data.username}`)
+                        $("#login").hide()
+                    } else {
+                        $("#msg").html(`Youre not logged in!`)
+                        $("#logout").hide()
+                    }
+
+                    console.log(data)
                 }
             })
 
