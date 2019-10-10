@@ -142,15 +142,6 @@ app.get("/logout", (req, res) => {
     })
 })
 
-app.get("/home", auth(), (req, res) => {
-    res.render("pages/root", {
-        title: "home",
-        parts: [
-            {name: "login", msg: `Hello ${req.user.username}`}
-        ]
-    })
-})
-
 function auth() {
     return (req, res, next) => {
         let token = req.cookies.session
@@ -172,23 +163,35 @@ function auth() {
                 user.uid == data.uid
             )
 
-            if (!user) {
-                return res.send({
-                    err: "not logged in"
-                })
-            }
-
-            req.user = user
+            if (typeof user != "undefined") {
+                req.user = user
+            } else {
+                req.user = false
+            } 
 
             next()
         })
     }
 }
 
-app.get("/username", auth(), (req, res) => {
-    res.send({
-        username: req.user.username
-    })
+app.get("/home", auth(), (req, res) => {
+    if (req.loggedin) {
+        res.render("pages/root", {
+            title: "home",
+            user: user,
+            parts: [
+                {name: "home", msg: `Hello ${req.user.username}`}
+            ]
+        })
+    } else {
+        res.render("pages/root", {
+            title: "home",
+            user: user,
+            parts: [
+                {name: "home", msg: `Hello, youre not loged in`}
+            ]
+        })
+    }
 })
 
 app.listen(port)

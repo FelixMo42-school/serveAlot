@@ -3,6 +3,15 @@
         <a class="navbar-brand" href="#">> LOG IN</a>
 
         <ul class="nav">
+            <% if ("user" in locals) {%>
+                <li class="nav-item" id="login">
+                    <a href="/logout">logout</a>
+                </li>
+            <% } else { %>
+                <li class="nav-item" id="logout">
+                    <a href="/login">login</a>
+                </li>
+            <% } %>
         </ul>
     </div>
 </nav>
