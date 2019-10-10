@@ -1,43 +1,40 @@
 <div class="container">
-    <div id="loginAlert" class="alert alert-danger" role="alert">
-        <span id="msg"></span>
-        <button
-            type="button"
-            class="close"
-            onclick="$('#loginAlert').fadeOut()"
-        >
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-</div>
-
-<div class="container login">
-    <div class="form-group">
-        <label for="username">Username</label>
-        <input
-            type="text"
-            id="username"
-            name="username"
-            class="form-control"
-            placeholder="Enter Username"
-            required
-        />
-    </div>
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            class="form-control"
-            placeholder="Enter password"
-            required
-        />
-    </div>
+    <form method="post">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input
+                type="text"
+                id="username"
+                name="username"
+                class="form-control"
+                placeholder="Enter Username"
+                required
+            />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input
+                type="password"
+                id="password"
+                name="password"
+                class="form-control"
+                placeholder="Enter password"
+                required
+            />
+        </div>
     
-    <div class="form-group">
-        <input type="button" value="log in" onclick="login()"/>
-        OR
-        <input type="button" value="register" onclick="register()"/>
-    </div>
+        <div class="form-group">
+            <input
+                type="submit"
+                value="log in"
+                formaction="/login"
+            />
+            <span>OR</span>
+            <input
+                type="submit"
+                value="register"
+                formaction="/register"
+            />
+        </div>
+    </form>
 </div>

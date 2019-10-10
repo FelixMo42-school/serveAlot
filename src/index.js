@@ -6,9 +6,8 @@ const cors         = require('cors')
 const jwt          = require('jsonwebtoken')
 const bcrypt       = require('bcrypt')
 const uuid         = require("uuid/v4")
-const ejs          = require('ejs')
 
-const port = 3000
+const port = 3100
 const saltRounds = 10
 const secret = "secret"
 
@@ -26,7 +25,9 @@ const users = []
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
         title: "login",
-        content: ejs.render("/partials/login")
+        parts: [
+            {name: "login"}
+        ]
     })
 })
 
@@ -35,27 +36,36 @@ app.post("/login", async (req, res) => {
     let password = req.body.password
 
     if ( typeof username != "string" || typeof password != "string" ) {
-        return res.send({
-            success: false,
-            err: "requires username and password"
+        return res.render("pages/root", {
+            title: "login",
+            parts: [
+                {name: "alert", level: "danger", msg: "requirems username and password"},
+                {name: "login"}
+            ]
         })
     }
 
     let user = users.find((user) => user.username == username)
 
     if ( !user ) {
-        return res.send({
-            success: false,
-            err: "invalid username"
+        return res.render("pages/root", {
+            title: "login",
+            parts: [
+                {name: "alert", level: "danger", msg: "invalid username"},
+                {name: "login"}
+            ]
         })
     }
 
     let match = await bcrypt.compare(password, user.password)
 
     if ( !match ) {
-        return res.send({
-            success: false,
-            err: "wrong password"
+        return res.render("pages/root", {
+            title: "login",
+            parts: [
+                {name: "alert", level: "danger", msg: "wrong password"},
+                {name: "login"}
+            ]
         })
     }
 
@@ -66,10 +76,7 @@ app.post("/login", async (req, res) => {
     let token = jwt.sign(data, secret, { expiresIn: "1h" })
 
     res.cookie('session', token)
-
-    res.send({
-        success: true
-    })
+    res.redirect("/home")
 })
 
 app.post("/register", async (req, res) => {
@@ -77,16 +84,22 @@ app.post("/register", async (req, res) => {
     let password = req.body.password
 
     if ( typeof username != "string" || typeof password != "string" ) {
-        return res.send({
-            success: false,
-            err: "requires username and password"
+        return res.render("pages/root", {
+            title: "login",
+            parts: [
+                {name: "alert", level: "danger", msg: "requirems username and password"},
+                {name: "login"}
+            ]
         })
     }
 
     if ( users.find((user) => user.username == username) ) {
-        return res.send({
-            success: false,
-            err: "username allready taken"
+        return res.render("pages/root", {
+            title: "login",
+            parts: [
+                {name: "alert", level: "danger", msg: "username allready taken"},
+                {name: "login"}
+            ]
         })
     }
 
@@ -103,9 +116,7 @@ app.post("/register", async (req, res) => {
     let token = jwt.sign(data, secret, { expiresIn: "1h" })
 
     res.cookie('session', token)
-    res.send({
-        success: true
-    })
+    res.redirect("/home")
 })
 
 app.get("/logout", (req, res) => {
@@ -127,7 +138,16 @@ app.get("/logout", (req, res) => {
         delete user.uid
 
         res.clearCookie()
-        res.redirect("/home.html")
+        res.redirect("/home")
+    })
+})
+
+app.get("/home", auth(), (req, res) => {
+    res.render("pages/root", {
+        title: "home",
+        parts: [
+            {name: "login", msg: `Hello ${req.user.username}`}
+        ]
     })
 })
 
