@@ -1,0 +1,19 @@
+<div class="container">
+    <form method="<%= method %>" action="<%= action %>">
+        <% for (let input of inputs) { %>
+            <div class="form-group">
+                <label for="<%= input.name %>"><%= input.question %></label>
+                <input
+                    type="<%= input.type %>"
+                    name="<%= input.name %>"
+                    placeholder="<%= input.placeholder %>"
+                    class="form-control"
+                    required
+                />
+            </div>
+        <% } %>
+        <input
+            type="submit"
+        />
+    </form>
+</div>

@@ -184,7 +184,13 @@ app.get("/home", (req, res) => {
             title: "home",
             user: req.user,
             parts: [
-                {name: "home", msg: `Hello ${req.user.username}`}
+                {name: "msg", msg: `Hello ${req.user.username}`},
+                {name: "msg", msg: "food" in req.user && `Your favorite food is ${req.user.food}.` || "We dont know youre favorite food"},
+                {name: "msg", msg: "age" in req.user && `You are ${req.user.age} years old.` || "We dont know how old you are"},
+                {name: "form", method: "post", action: "/log", inputs: [
+                    {question: "How old are you?", name: "age", placholder: "enter age", type: "number"},
+                    {question: "What's youre favorite food?", name: "food", placholder: "favorite food", type: "text"}
+                ]}
             ]
         })
     } else {
@@ -192,10 +198,17 @@ app.get("/home", (req, res) => {
             title: "home",
             user: req.user,
             parts: [
-                {name: "home", msg: `Hello, youre not loged in`}
+                {name: "alert", level: "info", msg: `You're not loged in.`}
             ]
         })
     }
+})
+
+app.post("/log", (req, res) => {
+    req.user.food = req.body.food
+    req.user.age = req.body.age
+
+    res.redirect("home")
 })
 
 app.listen(port)
