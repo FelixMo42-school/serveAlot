@@ -10,6 +10,38 @@ const uuid         = require("uuid/v4")
 const port = 3100
 const saltRounds = 10
 const secret = "secret"
+const users = []
+
+function auth() {
+    return (req, res, next) => {
+        let token = req.cookies.session
+
+        if (!token) {
+            req.user = false
+            return next()
+        }
+
+        jwt.verify(token, secret, (err, data) => {
+            if (err) {
+                return res.send({
+                    err: err
+                })
+            }
+
+            let user = users.find((user) =>
+                user.uid == data.uid
+            )
+
+            if (typeof user != "undefined") {
+                req.user = user
+            } else {
+                req.user = false
+            } 
+
+            next()
+        })
+    }
+}
 
 const app = express()
     .set('view engine', 'ejs')
@@ -19,12 +51,12 @@ const app = express()
     .use(cookieParser())
     .use(helmet())
     .use(cors())
-
-const users = []
+    .use(auth())
 
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
         title: "login",
+        user: req.user,
         parts: [
             {name: "login"}
         ]
@@ -50,6 +82,7 @@ app.post("/login", async (req, res) => {
     if ( !user ) {
         return res.render("pages/root", {
             title: "login",
+            user: req.user,
             parts: [
                 {name: "alert", level: "danger", msg: "invalid username"},
                 {name: "login"}
@@ -62,6 +95,7 @@ app.post("/login", async (req, res) => {
     if ( !match ) {
         return res.render("pages/root", {
             title: "login",
+            user: req.user,
             parts: [
                 {name: "alert", level: "danger", msg: "wrong password"},
                 {name: "login"}
@@ -86,6 +120,7 @@ app.post("/register", async (req, res) => {
     if ( typeof username != "string" || typeof password != "string" ) {
         return res.render("pages/root", {
             title: "login",
+            user: req.user,
             parts: [
                 {name: "alert", level: "danger", msg: "requirems username and password"},
                 {name: "login"}
@@ -96,8 +131,9 @@ app.post("/register", async (req, res) => {
     if ( users.find((user) => user.username == username) ) {
         return res.render("pages/root", {
             title: "login",
+            user: req.user,
             parts: [
-                {name: "alert", level: "danger", msg: "username allready taken"},
+                {name: "alert", level: "danger", msg: "username already taken"},
                 {name: "login"}
             ]
         })
@@ -124,7 +160,7 @@ app.get("/logout", (req, res) => {
 
     jwt.verify( token, secret, (err, data) => {
         if (err) {
-            return res.redirect("/home.html")
+            return res.redirect("/home")
         }
 
         let user = users.find((user) =>
@@ -132,7 +168,7 @@ app.get("/logout", (req, res) => {
         )
 
         if (!user) {
-            return res.redirect("/home.html")
+            return res.redirect("/home")
         }
 
         delete user.uid
@@ -142,43 +178,11 @@ app.get("/logout", (req, res) => {
     })
 })
 
-function auth() {
-    return (req, res, next) => {
-        let token = req.cookies.session
-
-        if (!token) {
-            return res.send({
-                err: "must be loged in"
-            })
-        }
-
-        jwt.verify(token, secret, (err, data) => {
-            if (err) {
-                return res.send({
-                    err: err
-                })
-            }
-
-            let user = users.find((user) =>
-                user.uid == data.uid
-            )
-
-            if (typeof user != "undefined") {
-                req.user = user
-            } else {
-                req.user = false
-            } 
-
-            next()
-        })
-    }
-}
-
-app.get("/home", auth(), (req, res) => {
-    if (req.loggedin) {
+app.get("/home", (req, res) => {
+    if (req.user) {
         res.render("pages/root", {
             title: "home",
-            user: user,
+            user: req.user,
             parts: [
                 {name: "home", msg: `Hello ${req.user.username}`}
             ]
@@ -186,7 +190,7 @@ app.get("/home", auth(), (req, res) => {
     } else {
         res.render("pages/root", {
             title: "home",
-            user: user,
+            user: req.user,
             parts: [
                 {name: "home", msg: `Hello, youre not loged in`}
             ]
