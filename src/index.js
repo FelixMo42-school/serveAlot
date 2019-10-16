@@ -6,11 +6,21 @@ const cors         = require('cors')
 const jwt          = require('jsonwebtoken')
 const bcrypt       = require('bcrypt')
 const uuid         = require("uuid/v4")
+const mongoose     = require('mongoose')
+const dotenv       = require('dotenv')
+
+dotenv.config()
+
+mongoose.connect(
+    `mongodb+srv://${process.env.SERVER_USERNAME}:${process.env.SERVER_PASSWORD}@servealot-iq7ib.mongodb.net/test`,
+    { useNewUrlParser: true, useUnifiedTopology: true }
+)
 
 const port = 3100
 const saltRounds = 10
 const secret = "secret"
 const users = []
+const User = mongoose.model('user', {username: String, password: String})
 
 function auth() {
     return (req, res, next) => {
@@ -184,13 +194,7 @@ app.get("/home", (req, res) => {
             title: "home",
             user: req.user,
             parts: [
-                {name: "msg", msg: `Hello ${req.user.username}`},
-                {name: "msg", msg: "food" in req.user && `Your favorite food is ${req.user.food}.` || "We dont know youre favorite food"},
-                {name: "msg", msg: "age" in req.user && `You are ${req.user.age} years old.` || "We dont know how old you are"},
-                {name: "form", method: "post", action: "/log", inputs: [
-                    {question: "How old are you?", name: "age", placholder: "enter age", type: "number"},
-                    {question: "What's youre favorite food?", name: "food", placholder: "favorite food", type: "text"}
-                ]}
+                {name: "msg", msg: `Hello ${req.user.username}`}
             ]
         })
     } else {
@@ -202,13 +206,6 @@ app.get("/home", (req, res) => {
             ]
         })
     }
-})
-
-app.post("/log", (req, res) => {
-    req.user.food = req.body.food
-    req.user.age = req.body.age
-
-    res.redirect("home")
 })
 
 app.listen(port)
