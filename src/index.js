@@ -3,13 +3,13 @@ const bodyParser   = require('body-parser')
 const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const cors         = require('cors')
-const jwt          = require('jsonwebtoken')
-const bcrypt       = require('bcrypt')
-const uuid         = require("uuid/v4")
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
 
 dotenv.config()
+
+const auth         = require('./models/Auth')
+console.log(auth)
 
 mongoose.connect(
     `mongodb+srv://${process.env.SERVER_USERNAME}:${process.env.SERVER_PASSWORD}@servealot-iq7ib.mongodb.net/test`,
@@ -22,37 +22,6 @@ const secret = "secret"
 const users = []
 const User = mongoose.model('user', {username: String, password: String})
 
-function auth() {
-    return (req, res, next) => {
-        let token = req.cookies.session
-
-        if (!token) {
-            req.user = false
-            return next()
-        }
-
-        jwt.verify(token, secret, (err, data) => {
-            if (err) {
-                return res.send({
-                    err: err
-                })
-            }
-
-            let user = users.find((user) =>
-                user.uid == data.uid
-            )
-
-            if (typeof user != "undefined") {
-                req.user = user
-            } else {
-                req.user = false
-            } 
-
-            next()
-        })
-    }
-}
-
 const app = express()
     .set('view engine', 'ejs')
     .use(express.static('public'))
@@ -61,7 +30,7 @@ const app = express()
     .use(cookieParser())
     .use(helmet())
     .use(cors())
-    .use(auth())
+    .use(auth.authenticate)
 
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
@@ -209,4 +178,4 @@ app.get("/home", (req, res) => {
 })
 
 app.listen(port)
-console.log(`[app] Listening at localhost:${port}`)
+console.log(`[app] Listening at localhost:${port}`)*/
