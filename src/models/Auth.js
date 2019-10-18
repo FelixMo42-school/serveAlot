@@ -54,7 +54,7 @@ class Auth {
 
             let sessionId = uuid() //TODO: sign it!
             let session = new Session({sessionId, username})
-            session.save()
+            session.save() // this is a promiseish
 
             resolve(session)
         })
@@ -63,12 +63,20 @@ class Auth {
     // res.cookie("session", sessionId, { httpOnly: true , secure: true })
 
     register(username, password) {
-        if ( User.exists({username}) ) {
-            return "username allready taken"
-        }
+        return new Promise((resolve, reject) => {
+            if ( User.exists({username}) ) {
+                reject("username allready taken")
+            }
 
-        let user = new User({username, password})
-        await user.save()
+            let user = new User({username, password})
+            user.save() // this is a promiseish
+
+            let sessionId = uuid() //TODO: sign it!
+            let session = new Session({sessionId, username})
+            session.save() // this is a promiseish
+
+            resolve(session)
+        })
     }
 }
 

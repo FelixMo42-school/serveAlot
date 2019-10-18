@@ -8,7 +8,7 @@ const dotenv       = require('dotenv')
 
 dotenv.config()
 
-const auth         = require('./models/Auth')
+const auth         = new require('./models/Auth')()
 console.log(auth)
 
 mongoose.connect(
@@ -46,115 +46,48 @@ app.post("/login", async (req, res) => {
     let username = req.body.username
     let password = req.body.password
 
-    if ( typeof username != "string" || typeof password != "string" ) {
-        return res.render("pages/root", {
-            title: "login",
-            parts: [
-                {name: "alert", level: "danger", msg: "requirems username and password"},
-                {name: "login"}
-            ]
+    auth.login(username, password)
+        .then((session) => {
+            res.cookie('session', session.sessionId, { httpOnly: true , secure: true })
+            res.redirect("/home")
         })
-    }
-
-    let user = users.find((user) => user.username == username)
-
-    if ( !user ) {
-        return res.render("pages/root", {
-            title: "login",
-            user: req.user,
-            parts: [
-                {name: "alert", level: "danger", msg: "invalid username"},
-                {name: "login"}
-            ]
+        .catch((error) => {
+            res.render("pages/root", {
+                title: "login",
+                user: req.user,
+                parts: [
+                    {name: "alert", level: "danger", msg: error},
+                    {name: "login"}
+                ]
+            })
         })
-    }
-
-    let match = await bcrypt.compare(password, user.password)
-
-    if ( !match ) {
-        return res.render("pages/root", {
-            title: "login",
-            user: req.user,
-            parts: [
-                {name: "alert", level: "danger", msg: "wrong password"},
-                {name: "login"}
-            ]
-        })
-    }
-
-    user.uid = uuid()
-
-    let data = { uid: user.uid }
-
-    let token = jwt.sign(data, secret, { expiresIn: "1h" })
-
-    res.cookie('session', token)
-    res.redirect("/home")
 })
 
 app.post("/register", async (req, res) => {
     let username = req.body.username
     let password = req.body.password
 
-    if ( typeof username != "string" || typeof password != "string" ) {
-        return res.render("pages/root", {
-            title: "login",
-            user: req.user,
-            parts: [
-                {name: "alert", level: "danger", msg: "requirems username and password"},
-                {name: "login"}
-            ]
+    auth.register(username, password)
+        .then((session) => {
+            res.cookie('session', session.sessionId, { httpOnly: true , secure: true })
+            res.redirect("/home")
         })
-    }
-
-    if ( users.find((user) => user.username == username) ) {
-        return res.render("pages/root", {
-            title: "login",
-            user: req.user,
-            parts: [
-                {name: "alert", level: "danger", msg: "username already taken"},
-                {name: "login"}
-            ]
+        .catch((error) => {
+            res.render("pages/root", {
+                title: "login",
+                user: req.user,
+                parts: [
+                    {name: "alert", level: "danger", msg: error},
+                    {name: "login"}
+                ]
+            })
         })
-    }
-
-    let user = {
-        username: username,
-        password: await bcrypt.hash(password, saltRounds),
-        uid: uuid()
-    }
-
-    users.push(user)
-
-    let data = { uid: user.uid }
-
-    let token = jwt.sign(data, secret, { expiresIn: "1h" })
-
-    res.cookie('session', token)
-    res.redirect("/home")
 })
 
 app.get("/logout", (req, res) => {
-    let token = req.cookies.session
+    let session = req.cookies.session
 
-    jwt.verify( token, secret, (err, data) => {
-        if (err) {
-            return res.redirect("/home")
-        }
-
-        let user = users.find((user) =>
-            user.uid == data.uid
-        )
-
-        if (!user) {
-            return res.redirect("/home")
-        }
-
-        delete user.uid
-
-        res.clearCookie()
-        res.redirect("/home")
-    })
+    //TODO: logout
 })
 
 app.get("/home", (req, res) => {
@@ -178,4 +111,4 @@ app.get("/home", (req, res) => {
 })
 
 app.listen(port)
-console.log(`[app] Listening at localhost:${port}`)*/
+console.log(`[app] Listening at localhost:${port}`)
