@@ -11,38 +11,27 @@ class Auth {
         
     }
 
-    authenticate(res, req, next) {
-        let token = req.cookies.session
+    authenticate(req, res, next) {
+        let sessionId = req.cookies.session
 
-        if (!token) {
-            req.user = false
+        if (!sessionId) {
             return next()
         }
 
-        jwt.verify(token, process.env.SECRET, (err, data) => {
-            if (err) {
-                return res.send({
-                    err: err
-                })
-            }
-
-            let user = users.find((user) =>
-                user.uid == data.uid
-            )
-
-            if (typeof user != "undefined") {
-                req.user = user
-            } else {
-                req.user = false
-            } 
-
-            next()
-        })
+        Session.findOne({sessionId})
+            .then(async session => {
+                req.session = session
+                req.user = await User.findOne({username: session.username})
+                next()
+            })
+            .catch(err => {
+                next()
+            })
     }
 
     login(username, password) {
-        return new Promise((resolve, reject) => {
-            let user = User.findOne({username})
+        return new Promise(async (resolve, reject) => {
+            let user = await User.findOne({username})
             if (!user) {
                 reject("user dosent exist")
             }
@@ -54,29 +43,45 @@ class Auth {
 
             let sessionId = uuid() //TODO: sign it!
             let session = new Session({sessionId, username})
-            session.save() // this is a promiseish
-
-            resolve(session)
+            session.save()
+                .then(() => {
+                    resolve(session)
+                })
+                .catch(err => {
+                    reject(err)
+                })
         })
     }
 
     // res.cookie("session", sessionId, { httpOnly: true , secure: true })
 
     register(username, password) {
-        return new Promise((resolve, reject) => {
-            if ( User.exists({username}) ) {
+        return new Promise(async (resolve, reject) => {
+            if ( await User.exists({username}) ) {
                 reject("username allready taken")
             }
 
             let user = new User({username, password})
-            user.save() // this is a promiseish
-
-            let sessionId = uuid() //TODO: sign it!
-            let session = new Session({sessionId, username})
-            session.save() // this is a promiseish
-
-            resolve(session)
+            user.save()
+                .then(() => {
+                    let sessionId = uuid() //TODO: sign it!
+                    let session = new Session({sessionId, username})
+                    session.save()
+                        .then(() => {
+                            resolve(session)
+                        })
+                        .catch(err => {
+                            reject(err)
+                        })
+                })
+                .catch(err => {
+                    reject(err)
+                })
         })
+    }
+
+    logout(session) {
+        session.remove()
     }
 }
 

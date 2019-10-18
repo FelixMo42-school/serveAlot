@@ -18,8 +18,9 @@ const userSchema = new Schema({
     },
     created_at: {
         type: Date,
-        required: true
-    }  
+        required: true,
+        default: Date.now
+    }
 })
 
 userSchema.pre("save", function (next) {
@@ -35,8 +36,8 @@ userSchema.pre("save", function (next) {
     }
 })
 
-userSchema.method.checkPassword = async function(password) {
-    return bcrypt.compare(password, user.password)
+userSchema.methods.checkPassword = async function(password) {
+    return bcrypt.compare(password, this.password)
 }
 
 module.exports = mongoose.model('user', userSchema)
