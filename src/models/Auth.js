@@ -1,10 +1,6 @@
-const jwt      = require("jsonwebtoken")
-const bcrypt   = require("bcrypt")
 const uuid     = require("uuid/v4")
 const User     = require("./User")
 const Session  = require("./Session")
-
-let defaultUser = {}
 
 class Auth {
     constructor(app) {
@@ -25,6 +21,7 @@ class Auth {
                 next()
             })
             .catch(err => {
+                req.user = false
                 next()
             })
     }
@@ -81,7 +78,9 @@ class Auth {
     }
 
     logout(session) {
-        session.remove()
+        if (session) {
+            session.remove()
+        }
     }
 }
 
