@@ -1,0 +1,4 @@
+openssl req -nodes -new -x509 -keyout server.key -out server.cert
+https://timonweb.com/posts/running-expressjs-server-over-https/
+
+https://blog.risingstack.com/node-js-security-checklist/

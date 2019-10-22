@@ -2,24 +2,22 @@ const express      = require('express')
 const bodyParser   = require('body-parser')
 const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
-const cors         = require('cors')
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
 
 dotenv.config()
-const Auth = require('./models/Auth')
-const auth = new Auth()
 
 mongoose.connect(
     `mongodb+srv://${process.env.SERVER_USERNAME}:${process.env.SERVER_PASSWORD}@servealot-iq7ib.mongodb.net/test`,
     { useCreateIndex: true, useNewUrlParser: true, useUnifiedTopology: true }
 )
 
-const port = 3100
+const Auth = require('./models/Auth')
+const auth = new Auth()
 
 const app = express()
     .set('view engine', 'ejs')
-    .use(express.static('public'))
+    //.use(express.static('public'))
     //.use(bodyParser.json({}))
     .use(bodyParser.urlencoded({extended: true}))
     .use(cookieParser())
@@ -45,7 +43,7 @@ app.post("/login", async (req, res) => {
     auth.login(username, password)
         .then((session) => {
             res.cookie('session', session.sessionId, { httpOnly: true }) // do secure once https
-            res.redirect("/home")
+            res.redirect("/")
         })
         .catch((error) => {
             res.render("pages/root", {
@@ -65,8 +63,8 @@ app.post("/register", async (req, res) => {
 
     auth.register(username, password)
         .then((session) => {
-            res.cookie('session', session.sessionId, { httpOnly: true }) // do secure latter
-            res.redirect("/home")
+            res.cookie('session', session.sessionId, { httpOnly: true }) // do secure once https
+            res.redirect("/")
         })
         .catch((error) => {
             res.render("pages/root", {
@@ -85,7 +83,7 @@ app.get("/logout", (req, res) => {
     res.redirect("login")
 })
 
-app.get("/home", (req, res) => {
+app.get("/", (req, res) => {
     if (req.session) {
         res.render("pages/root", {
             title: "home",
@@ -104,5 +102,6 @@ app.get("/home", (req, res) => {
     }
 })
 
-app.listen(port)
-console.log(`[app] Listening at localhost:${port}`)
+app.listen(process.env.PORT, () => {
+    console.log(`[app] Listening at localhost:${process.env.PORT}`)
+})
