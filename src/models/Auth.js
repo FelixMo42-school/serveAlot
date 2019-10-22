@@ -14,10 +14,9 @@ class Auth {
             return next()
         }
 
-        Session.findOne({sessionId})
-            .then(async session => {
+        Session.findOne({sessionId}).populate('user')
+            .then(session => {
                 req.session = session
-                req.user = await User.findOne({username: session.username})
                 next()
             })
             .catch(err => {
@@ -39,7 +38,7 @@ class Auth {
             }
 
             let sessionId = uuid() //TODO: sign it!
-            let session = new Session({sessionId, username})
+            let session = new Session({sessionId, user: user._id})
             session.save()
                 .then(() => {
                     resolve(session)
@@ -49,8 +48,6 @@ class Auth {
                 })
         })
     }
-
-    // res.cookie("session", sessionId, { httpOnly: true , secure: true })
 
     register(username, password) {
         return new Promise(async (resolve, reject) => {
@@ -62,7 +59,10 @@ class Auth {
             user.save()
                 .then(() => {
                     let sessionId = uuid() //TODO: sign it!
-                    let session = new Session({sessionId, username})
+                    let session = new Session({
+                        sessionId: sessionId,
+                        user: user._id
+                    })
                     session.save()
                         .then(() => {
                             resolve(session)

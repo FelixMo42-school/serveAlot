@@ -7,8 +7,9 @@ let sessionSchema = new Schema({
         required: true,
         unique: true
     },
-    username: {
-        type: String,
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
         required: true
     },
     createdAt: {

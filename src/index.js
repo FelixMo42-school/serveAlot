@@ -16,17 +16,14 @@ mongoose.connect(
 )
 
 const port = 3100
-const saltRounds = 10
-const secret = "secret"
-const users = []
 
 const app = express()
     .set('view engine', 'ejs')
-    //.use(express.static('public'))
+    .use(express.static('public'))
     //.use(bodyParser.json({}))
     .use(bodyParser.urlencoded({extended: true}))
     .use(cookieParser())
-    //.use(helmet())
+    .use(helmet())
     //.use(cors())
     .use(auth.authenticate)
     
@@ -89,18 +86,17 @@ app.get("/logout", (req, res) => {
 })
 
 app.get("/home", (req, res) => {
-    if (req.user) {
+    if (req.session) {
         res.render("pages/root", {
             title: "home",
-            user: req.user,
+            user: req.session.user,
             parts: [
-                {name: "msg", msg: `Hello ${req.user.username}`}
+                {name: "msg", msg: `Hello ${req.session.user.username}`}
             ]
         })
     } else {
         res.render("pages/root", {
             title: "home",
-            user: req.user,
             parts: [
                 {name: "alert", level: "info", msg: `You're not loged in.`}
             ]

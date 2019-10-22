@@ -3,7 +3,7 @@
         <a class="navbar-brand" href="#">> <%= title.toUpperCase() %></a>
 
         <ul class="nav">
-            <% if (user) {%>
+            <% if ("user" in locals) {%>
                 <li class="nav-item" id="logout">
                     <a href="/logout">logout</a>
                 </li>
