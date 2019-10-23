@@ -20,7 +20,7 @@ const app = express()
     //.use(express.static('public'))
     //.use(bodyParser.json({}))
     .use(bodyParser.urlencoded({extended: true}))
-    .use(cookieParser())
+    .use(cookieParser( process.env.SECRET ))
     .use(helmet())
     //.use(cors())
     .use(auth.authenticate)
@@ -42,7 +42,7 @@ app.post("/login", async (req, res) => {
 
     auth.login(username, password)
         .then((session) => {
-            res.cookie('session', session.sessionId, { httpOnly: true }) // do secure once https
+            res.cookie('session', session.sessionId, { httpOnly: true, signed: true }) // do secure once https
             res.redirect("/")
         })
         .catch((error) => {
@@ -63,7 +63,7 @@ app.post("/register", async (req, res) => {
 
     auth.register(username, password)
         .then((session) => {
-            res.cookie('session', session.sessionId, { httpOnly: true }) // do secure once https
+            res.cookie('session', session.sessionId, { httpOnly: true, signed: true }) // do secure once https
             res.redirect("/")
         })
         .catch((error) => {

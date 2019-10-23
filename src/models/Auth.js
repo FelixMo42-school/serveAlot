@@ -8,7 +8,7 @@ class Auth {
     }
 
     authenticate(req, res, next) {
-        let sessionId = req.cookies.session
+        let sessionId = req.signedCookies.session
 
         if (!sessionId) {
             return next()
