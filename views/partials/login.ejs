@@ -1,7 +1,7 @@
 <div class="container">
     <form method="post">
         <div class="form-group">
-            <label for="username">Username</label>
+            <label class="text-light" for="username">Username</label>
             <input
                 type="text"
                 id="username"
@@ -12,7 +12,7 @@
             />
         </div>
         <div class="form-group">
-            <label for="password">Password</label>
+            <label class="text-light" for="password">Password</label>
             <input
                 type="password"
                 id="password"
@@ -26,12 +26,14 @@
         <div class="form-group">
             <input
                 type="submit"
+                class="btn btn-primary"
                 value="log in"
                 formaction="/login"
             />
-            <span>OR</span>
+            <span class="text-light" >OR</span>
             <input
                 type="submit"
+                class="btn btn-primary"
                 value="register"
                 formaction="/register"
             />
