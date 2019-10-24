@@ -4,6 +4,8 @@ const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
+const sass         = require('node-sass')
+
 
 dotenv.config()
 
@@ -17,7 +19,7 @@ const auth = new Auth()
 
 const app = express()
     .set('view engine', 'ejs')
-    //.use(express.static('public'))
+    .use(express.static('public'))
     //.use(bodyParser.json({}))
     .use(bodyParser.urlencoded({extended: true}))
     .use(cookieParser( process.env.SECRET ))

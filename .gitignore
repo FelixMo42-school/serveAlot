@@ -63,3 +63,6 @@ typings/
 # certificates and keys
 *.cert
 *.key
+
+# build files
+public/css/
