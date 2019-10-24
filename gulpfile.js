@@ -1,6 +1,6 @@
 const gulp    = require('gulp')
 const nodemon = require('gulp-nodemon')
-const sass    = require('gulp-sass')
+const scss    = require('gulp-sass')
 
 gulp.task("server", async (done) => 
     nodemon({
@@ -17,16 +17,16 @@ gulp.task("server", async (done) =>
     })
 )
 
-sass.compiler = require('node-sass')
+scss.compiler = require('node-sass')
 
-gulp.task('sass', async () =>
-    gulp.watch('./sass/**/*.scss', gulp.series("sass:build"))
+gulp.task('scss', async () =>
+    gulp.watch('./scss/**/*.scss', gulp.series("scss:build"))
 )
 
-gulp.task("sass:build", async () =>
-    gulp.src('./sass/**/*.scss')
-        .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
+gulp.task("scss:build", async () =>
+    gulp.src('./scss/**/*.scss')
+        .pipe(scss({outputStyle: 'compressed'}).on('error', scss.logError))
         .pipe(gulp.dest('./public/css'))
 )
 
-gulp.task("start", gulp.parallel("server", "sass"))
+gulp.task("start", gulp.parallel("server", "scss"))
