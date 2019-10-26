@@ -4,12 +4,13 @@ class Board {
     constructor() {
         this.board = []
         this.tiles = []
+        this.merged = []
 
         for (let x = 0; x < 4; x++) {
             this.board[x] = []
             for (let y = 0; y < 4; y++) {
                 this.board[x][y] = 0
-                this.tiles.append( [x, t] )
+                this.tiles.push( [x, y] )
             }
         }
 
@@ -26,15 +27,40 @@ class Board {
         this.board[x][y] = val
     }
 
-    moveTile(x, y, dx, dy) {
+    inRange(x, y) {
+        return x >= 0 && y >= 0 && x < 4 && y < 4
+    }
+
+    moveTile(x, y, dx, dy, traversals) {
+        if (this.getTile(x, y) == 0) {
+            return
+        }
+
         while (true) {
             let [tx, ty] = [x + dx, y + dy]
+            if (!this.inRange(tx, ty)) {
+                break
+            }
+
+            if (this.merged.find(([x, y]) => x == tx && y == ty)) {
+                break
+            }
+
             let targetTileValue = this.getTile(tx, ty)
             let value = this.getTile(x, y)
 
             if (targetTileValue == 0 || targetTileValue == value) {
                 this.setTile(x, y, 0)
                 this.setTile(tx, ty, targetTileValue + value)
+
+                console.log(`${x}, ${y} (${value}) => ${tx}, ${ty} (${targetTileValue})`)
+
+                if (targetTileValue == value) {
+                    break
+                }
+
+                x = tx
+                y = ty
             } else {
                 break
             }
@@ -44,10 +70,12 @@ class Board {
     move(direction) {
         let [dx, dy] = [0, 0]
 
-        if (direction == "up") dy = 1
-        if (direction == "down") dy = -1    
-        if (direction == "right") dx = 1
-        if (direction == "left") dx = -1
+        this.merged = []
+
+        if (direction == "up")    { dy = 1 }
+        if (direction == "down")  { dy = -1 }   
+        if (direction == "right") { dx = 1 }
+        if (direction == "left")  { dx = -1 }
 
         if (dx == 0 && dy == 0) return
 
@@ -58,20 +86,26 @@ class Board {
             traversals.y.push(pos)
         }
 
-        if (dx == 1) traversals.x = traversals.x.reverse()
-        if (dy == 1) traversals.y = traversals.y.reverse()
+        if (dx == 1) { traversals.x = traversals.x.reverse() }
+        if (dy == 1) { traversals.y = traversals.y.reverse() }
 
-        
+        traversals.x.forEach(x => {
+            traversals.y.forEach(y => {
+                this.moveTile(x, y, dx, dy)
+            })
+        })
+
+        this.addRandomTile()
     }
 
     addRandomTile() {
         let value = Math.random() < 0.9 ? 2 : 4
 
         let [x, y] = _.sample(
-            this.tiles.filter(([x, y]) => this.getTile(x, y) != 0)
+            this.tiles.filter(([x, y]) => this.getTile(x, y) == 0)
         )
         
-        setTile(x, y, value)
+        this.setTile(x, y, value)
     }
 }
 
@@ -87,6 +121,8 @@ class Game {
                         direction
                     } = JSON.parse(msg)
 
+                    board.move(direction)
+
                     socket.emit( JSON.stringify({
                         dead: false,
                         board: board.board
@@ -101,3 +137,5 @@ class Game {
             })
     }
 }
+
+module.exports = Game
