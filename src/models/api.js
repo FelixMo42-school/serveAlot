@@ -149,46 +149,53 @@ class Board {
 }
 
 class Game {
-    constructor(app) {
+    constructor(app, auth) {
         require('socket.io')(1234)
             .of("/2048")
             .on('connection', (socket) => {
-                let board = new Board()
+                let username = socket.handshake.headers.username
+                let password = socket.handshake.headers.password
 
-                console.log("new user")
+                auth.login(username, password)
+                    .then((user) => {
+                        let board = new Board()
 
-                socket.emit('turn', JSON.stringify({
-                    score: board.score,
-                    successfulMove: true,
-                    board: board.board
-                }) )
-
-                socket.on('turn', (msg) => {
-                    let {
-                        direction
-                    } = JSON.parse(msg)
-
-                    let move = board.move(direction)
-
-                    if ( board.gameOver() ) {
-                        socket.emit('end', JSON.stringify({
-                            score: board.score,
-                            board: board.board
-                        }) )
-                    } else {
                         socket.emit('turn', JSON.stringify({
-                            successfulMove: move,
                             score: board.score,
+                            successfulMove: true,
                             board: board.board
                         }) )
-                    }
-                })
-                socket.on('disconnect', () => {
-                    
-                    socket.emit( JSON.stringify({
-                        score: board.score
-                    }) )
-                })
+
+                        socket.on('turn', (msg) => {
+                            let {
+                                direction
+                            } = JSON.parse(msg)
+        
+                            let move = board.move(direction)
+        
+                            if ( board.gameOver() ) {
+                                socket.emit('end', JSON.stringify({
+                                    score: board.score,
+                                    board: board.board
+                                }) )
+                            } else {
+                                socket.emit('turn', JSON.stringify({
+                                    successfulMove: move,
+                                    score: board.score,
+                                    board: board.board
+                                }) )
+                            }
+                        })
+
+                        socket.on('disconnect', () => {
+                            socket.emit( JSON.stringify({
+                                score: board.score
+                            }) )
+                        })
+                    })
+                    .catch(() => {
+                        socket.disconnect()
+                    })
             })
     }
 }

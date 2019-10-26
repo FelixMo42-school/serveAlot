@@ -103,7 +103,7 @@ app.get("/", (req, res) => {
 })
 
 let api = require('./models/api')
-let io = (new api(app))
+let io = (new api(app, auth))
 
 app.listen(process.env.PORT, () => {
     console.log(`[app] Listening at localhost:${process.env.PORT}`)

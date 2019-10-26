@@ -27,14 +27,15 @@ class Auth {
 
     login(username, password) {
         return new Promise(async (resolve, reject) => {
+            console.log(username, password)
             let user = await User.findOne({username})
             if (!user) {
-                reject("user dosent exist")
+                return reject("user dosent exist")
             }
 
             let validPassword = await user.checkPassword(password)
             if (!validPassword) {
-                reject("invalid password")
+                return reject("invalid password")
             }
 
             let sessionId = uuid() //TODO: sign it!
