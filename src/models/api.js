@@ -5,6 +5,7 @@ class Board {
         this.board = []
         this.tiles = []
         this.merged = []
+        this.score = 0
 
         for (let x = 0; x < 4; x++) {
             this.board[x] = []
@@ -31,10 +32,12 @@ class Board {
         return x >= 0 && y >= 0 && x < 4 && y < 4
     }
 
-    moveTile(x, y, dx, dy, traversals) {
+    moveTile(x, y, dx, dy) {
         if (this.getTile(x, y) == 0) {
-            return
+            return false
         }
+
+        let move = false
 
         while (true) {
             let [tx, ty] = [x + dx, y + dy]
@@ -53,9 +56,10 @@ class Board {
                 this.setTile(x, y, 0)
                 this.setTile(tx, ty, targetTileValue + value)
 
-                console.log(`${x}, ${y} (${value}) => ${tx}, ${ty} (${targetTileValue})`)
+                move = true
 
                 if (targetTileValue == value) {
+                    this.score += targetTileValue + value
                     break
                 }
 
@@ -65,6 +69,8 @@ class Board {
                 break
             }
         }
+
+        return move
     }
 
     move(direction) {
@@ -89,23 +95,56 @@ class Board {
         if (dx == 1) { traversals.x = traversals.x.reverse() }
         if (dy == 1) { traversals.y = traversals.y.reverse() }
 
+        let move = false
+
         traversals.x.forEach(x => {
             traversals.y.forEach(y => {
-                this.moveTile(x, y, dx, dy)
+                if ( this.moveTile(x, y, dx, dy) ) {
+                    move = true
+                }
             })
         })
 
-        this.addRandomTile()
+        if (move) {
+            this.addRandomTile()
+        }
+
+        return move
     }
 
     addRandomTile() {
         let value = Math.random() < 0.9 ? 2 : 4
 
-        let [x, y] = _.sample(
-            this.tiles.filter(([x, y]) => this.getTile(x, y) == 0)
-        )
+        let [x, y] = _.sample( this.getOpenTiles() )
         
         this.setTile(x, y, value)
+    }
+
+    getOpenTiles() {
+        return this.tiles.filter(([x, y]) => this.getTile(x, y) == 0)
+    }
+
+    gameOver() {
+        let openTiles = this.getOpenTiles()
+        if ( openTiles.length > 0 ) {
+            return false
+        }
+
+        for (var x = 0; x < 4; x++) {
+            for (var y = 0; y < 4; y++) {
+                for (let [dx, dy] in [[0,1],[1,0],[0,-1],[-1,0]]) {
+                    if (!this.inRange(x + dx, y + dy)) { continue }
+
+                    console.log(x, y, dx, dy)
+
+                    if (this.getTile(x, y) == this.getTile(x + dx, y + dy)) {
+                        return false
+                    }
+                }
+            }
+        }
+
+        return true
     }
 }
 
@@ -116,22 +155,38 @@ class Game {
             .on('connection', (socket) => {
                 let board = new Board()
 
-                socket.on('message', (msg) => {
+                console.log("new user")
+
+                socket.emit('turn', JSON.stringify({
+                    score: board.score,
+                    successfulMove: true,
+                    board: board.board
+                }) )
+
+                socket.on('turn', (msg) => {
                     let {
                         direction
                     } = JSON.parse(msg)
 
-                    board.move(direction)
+                    let move = board.move(direction)
 
-                    socket.emit( JSON.stringify({
-                        dead: false,
-                        board: board.board
-                    }) )
+                    if ( board.gameOver() ) {
+                        socket.emit('end', JSON.stringify({
+                            score: board.score,
+                            board: board.board
+                        }) )
+                    } else {
+                        socket.emit('turn', JSON.stringify({
+                            successfulMove: move,
+                            score: board.score,
+                            board: board.board
+                        }) )
+                    }
                 })
                 socket.on('disconnect', () => {
                     
                     socket.emit( JSON.stringify({
-                        
+                        score: board.score
                     }) )
                 })
             })

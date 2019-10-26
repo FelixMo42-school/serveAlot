@@ -4,8 +4,6 @@ const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
-const sass         = require('node-sass')
-
 
 dotenv.config()
 
@@ -103,6 +101,9 @@ app.get("/", (req, res) => {
         })
     }
 })
+
+let api = require('./models/api')
+let io = (new api(app))
 
 app.listen(process.env.PORT, () => {
     console.log(`[app] Listening at localhost:${process.env.PORT}`)
