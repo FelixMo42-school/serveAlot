@@ -27,17 +27,7 @@ class Player(socketio.ClientNamespace):
         
         if "gameOver" in self.callbacks:
             self.callbacks["gameOver"](data)
-
-        self.sio.disconnect()
-
-    def on_disconnect(self):
-        #print( self.sio.disconnected )
-        #self.sio.
-            #pass
-
         
-        print("disconnect")
-
     def on(self, event):
         def decorator(func):
             self.callbacks[event] = func
@@ -47,16 +37,17 @@ class Player(socketio.ClientNamespace):
 
     def startGame(self):
         if "turn" in self.callbacks:
-            self.sio=socketio.Client()
-            self.sio.register_namespace(self)
+            sio=socketio.Client(reconnection=False)
+            sio.register_namespace(self)
 
-            self.sio.connect("http://localhost:1234", {
+            sio.connect("http://localhost:1234", {
                 "username": self.username,
                 "password": self.password,
             })
-            #self.sio.wait()
+            
+            sio.wait()
         else:
-            print("Must have an onturn callback to play game.")
+            print("Must have an turn callback to play game.")
 
 ######################################################################
 
@@ -82,6 +73,6 @@ def turn(data):
 def end(data):
     print("final score ", data["score"])
 
-print(">")
-player.startGame()
-print("<")
+for i in range(10):
+    print(f"============={i}>")
+    player.startGame()

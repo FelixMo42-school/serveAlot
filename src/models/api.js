@@ -154,8 +154,6 @@ class Board {
                 for (let [dx, dy] in [[0,1],[1,0],[0,-1],[-1,0]]) {
                     if (!this.inRange(x + dx, y + dy)) { continue }
 
-                    console.log(x, y, dx, dy)
-
                     if (this.getTile(x, y) == this.getTile(x + dx, y + dy)) {
                         return false
                     }
@@ -197,7 +195,7 @@ class Game {
                                     score: board.score,
                                     board: board.board
                                 }) )
-                                //socket.disconnect(false)
+                                socket.disconnect(true)
                             } else {
                                 socket.emit('turn', JSON.stringify({
                                     successfulMove: move,
