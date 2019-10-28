@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
+const Game         = require('./models/Game')
 
 dotenv.config()
 
@@ -83,23 +84,23 @@ app.get("/logout", (req, res) => {
     res.redirect("login")
 })
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+    let parts = []
+
     if (req.session) {
-        res.render("pages/root", {
-            title: "home",
-            user: req.session.user,
-            parts: [
-                {name: "msg", msg: `Hello ${req.session.user.username}`}
-            ]
-        })
-    } else {
-        res.render("pages/root", {
-            title: "home",
-            parts: [
-                {name: "alert", level: "info", msg: `You're not loged in.`}
-            ]
-        })
+        parts.push({name: "msg", msg: `Hello ${req.session.user.username}`})
     }
+
+    parts.push({
+        name: "home",
+        games: await Game.find().populate('user')
+    })
+
+    res.render("pages/root", {
+        title: "home",
+        user: req.user,
+        parts: parts
+    })
 })
 
 let api = require('./models/api')
