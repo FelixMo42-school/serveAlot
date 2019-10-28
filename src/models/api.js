@@ -1,4 +1,23 @@
-const _ = require("lodash")
+const { sample } = require("lodash")
+const mongoose   = require('mongoose')
+const Schema     = mongoose.Schema
+
+const gameSchema = new Schema({
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+        required: true
+    },
+    score: {
+        type: Number,
+        required: true
+    },
+    created_at: {
+        type: Date,
+        required: true,
+        default: Date.now
+    }
+})
 
 class Board {
     constructor() {
@@ -115,7 +134,7 @@ class Board {
     addRandomTile() {
         let value = Math.random() < 0.9 ? 2 : 4
 
-        let [x, y] = _.sample( this.getOpenTiles() )
+        let [x, y] = sample( this.getOpenTiles() )
         
         this.setTile(x, y, value)
     }
@@ -178,6 +197,7 @@ class Game {
                                     score: board.score,
                                     board: board.board
                                 }) )
+                                //socket.disconnect(false)
                             } else {
                                 socket.emit('turn', JSON.stringify({
                                     successfulMove: move,
@@ -185,12 +205,6 @@ class Game {
                                     board: board.board
                                 }) )
                             }
-                        })
-
-                        socket.on('disconnect', () => {
-                            socket.emit( JSON.stringify({
-                                score: board.score
-                            }) )
                         })
                     })
                     .catch(() => {

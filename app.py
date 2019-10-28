@@ -9,46 +9,79 @@ class Player(socketio.ClientNamespace):
         self.username = username
         self.password = password
 
+        self.callbacks = {}
+
     def on_connect(self):
-        print("Joined game!")
-
-        self.emit("auth", json.dumps({
-            "username": self.username,
-            "password": self.password
-        }))
-
-    def on_start(self, msg):
-        print("Game starts!")
+        if "gameStart" in self.callbacks:
+            self.callbacks["gameStart"]()
 
     def on_turn(self, msg):
         data = json.loads(msg)
 
-        self.emit("turn", json.dumps({
-            "direction": random.choice([
-                "left", "right", "up", "down"
-            ])
-        }))
+        self.emit("turn", json.dumps(
+            self.callbacks["turn"](data)
+        ))
 
     def on_end(self, msg):
-        print("game over")
-        print(f"score: {json.loads(msg)['score']}")
+        data = json.loads(msg)
+        
+        if "gameOver" in self.callbacks:
+            self.callbacks["gameOver"](data)
 
         self.sio.disconnect()
 
     def on_disconnect(self):
-        print("disconnect")
+        #print( self.sio.disconnected )
+        #self.sio.
+            #pass
+
         
-        self.sio.disconnect()
+        print("disconnect")
+
+    def on(self, event):
+        def decorator(func):
+            self.callbacks[event] = func
+            return func
+
+        return decorator
 
     def startGame(self):
-        sio=socketio.Client()
-        sio.register_namespace(self)
+        if "turn" in self.callbacks:
+            self.sio=socketio.Client()
+            self.sio.register_namespace(self)
 
-        self.sio = sio
+            self.sio.connect("http://localhost:1234", {
+                "username": self.username,
+                "password": self.password,
+            })
+            #self.sio.wait()
+        else:
+            print("Must have an onturn callback to play game.")
 
-        sio.connect("http://localhost:1234", {
-            "username": self.username,
-            "password": self.password,
-        })
+######################################################################
 
-Player("admin", "12345").startGame()
+player = Player("admin", "123456")
+
+@player.on("gameStart")
+def start():
+    print("game is starting")
+
+@player.on("turn")
+def turn(data):
+    # print("board ", data["board"])
+    # print("score ", data["score"])
+    # print("successfulMove ", data["successfulMove"])
+
+    return {
+        "direction": random.choice([
+            "left", "right", "up", "down"
+        ])
+    }
+
+@player.on("gameOver")
+def end(data):
+    print("final score ", data["score"])
+
+print(">")
+player.startGame()
+print("<")
