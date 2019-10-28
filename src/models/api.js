@@ -1,10 +1,9 @@
 const { sample } = require("lodash")
 const mongoose   = require('mongoose')
-const Schema     = mongoose.Schema
 
-const gameSchema = new Schema({
+const gameSchema = new mongoose.Schema({
     user: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         required: true
     },
@@ -18,6 +17,8 @@ const gameSchema = new Schema({
         default: Date.now
     }
 })
+
+const Game = mongoose.model('2048', gameSchema)
 
 class Board {
     constructor() {
@@ -165,7 +166,7 @@ class Board {
     }
 }
 
-class Game {
+class Api {
     constructor(app, auth) {
         require('socket.io')(1234)
             .of("/2048")
@@ -174,7 +175,7 @@ class Game {
                 let password = socket.handshake.headers.password
 
                 auth.login(username, password)
-                    .then((user) => {
+                    .then((session) => {
                         let board = new Board()
 
                         socket.emit('turn', JSON.stringify({
@@ -191,6 +192,12 @@ class Game {
                             let move = board.move(direction)
         
                             if ( board.gameOver() ) {
+                                let game = new Game({
+                                    user: session.user,
+                                    score: board.score
+                                })
+                                game.save()
+
                                 socket.emit('end', JSON.stringify({
                                     score: board.score,
                                     board: board.board
@@ -212,4 +219,4 @@ class Game {
     }
 }
 
-module.exports = Game
+module.exports = Api

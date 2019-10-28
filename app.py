@@ -44,7 +44,7 @@ class Player(socketio.ClientNamespace):
                 "username": self.username,
                 "password": self.password,
             })
-            
+
             sio.wait()
         else:
             print("Must have an turn callback to play game.")
@@ -73,6 +73,4 @@ def turn(data):
 def end(data):
     print("final score ", data["score"])
 
-for i in range(10):
-    print(f"============={i}>")
-    player.startGame()
+player.startGame()
