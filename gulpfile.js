@@ -1,6 +1,8 @@
-const gulp    = require('gulp')
-const nodemon = require('gulp-nodemon')
-const scss    = require('gulp-sass')
+const gulp         = require('gulp')
+const nodemon      = require('gulp-nodemon')
+const scss         = require('gulp-sass')
+const autoprefixer = require('gulp-autoprefixer')
+
 
 gulp.task("server", async (done) => 
     nodemon({
@@ -26,6 +28,7 @@ gulp.task('scss', async () =>
 gulp.task("scss:build", async () =>
     gulp.src('./scss/**/*.scss')
         .pipe(scss({outputStyle: 'compressed'}).on('error', scss.logError))
+        .pipe(autoprefixer('last 10 versions', 'ie 9'))
         .pipe(gulp.dest('./public/css'))
 )
 
