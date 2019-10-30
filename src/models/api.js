@@ -148,8 +148,8 @@ class Board {
 }
 
 class Api {
-    constructor(app, auth) {
-        require('socket.io')(1234)
+    constructor(server, auth) {
+        require('socket.io')(server)
             .of("/2048")
             .on('connection', (socket) => {
                 let username = socket.handshake.headers.username
