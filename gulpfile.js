@@ -3,6 +3,7 @@ const nodemon      = require('gulp-nodemon')
 const scss         = require('gulp-sass')
 const autoprefixer = require('gulp-autoprefixer')
 
+// server task
 
 gulp.task("server", async (done) => 
     nodemon({
@@ -19,11 +20,9 @@ gulp.task("server", async (done) =>
     })
 )
 
-scss.compiler = require('node-sass')
+// scss task
 
-gulp.task("scss", async () => 
-    gulp.series("scss:build", "scss:watch")
-)
+scss.compiler = require('node-sass')
 
 gulp.task('scss:watch', async () =>
     gulp.watch('./scss/**/*.scss', gulp.series("scss:build"))
@@ -36,4 +35,8 @@ gulp.task("scss:build", async () =>
         .pipe(gulp.dest('./public/css'))
 )
 
-gulp.task("start", gulp.parallel("server", "scss"))
+gulp.task("scss", gulp.series("scss:build", "scss:watch"))
+
+// npm task
+
+gulp.task("start", gulp.series("scss", "server"))
