@@ -21,7 +21,11 @@ gulp.task("server", async (done) =>
 
 scss.compiler = require('node-sass')
 
-gulp.task('scss', async () =>
+gulp.task("scss", async () => 
+    gulp.series("scss:build", "scss:watch")
+)
+
+gulp.task('scss:watch', async () =>
     gulp.watch('./scss/**/*.scss', gulp.series("scss:build"))
 )
 
