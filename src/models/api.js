@@ -148,16 +148,19 @@ class Board {
 }
 
 class Api {
-    constructor(app, auth) {
-        require('socket.io')(1234)
+    constructor(server, auth) {
+        require('socket.io')(server)
             .of("/2048")
             .on('connection', (socket) => {
                 let username = socket.handshake.headers.username
                 let password = socket.handshake.headers.password
 
+                console.log("socket resived")
+
                 auth.login(username, password)
                     .then((session) => {
                         let board = new Board()
+                        console.log("socket logged in")
 
                         socket.emit('turn', JSON.stringify({
                             score: board.score,
@@ -179,12 +182,16 @@ class Api {
                                 })
                                 game.save()
 
+                                console.log("socket done")
+
                                 socket.emit('end', JSON.stringify({
                                     score: board.score,
                                     board: board.board
                                 }) )
                                 socket.disconnect(true)
                             } else {
+                                console.log("socket turn")
+
                                 socket.emit('turn', JSON.stringify({
                                     successfulMove: move,
                                     score: board.score,
@@ -194,6 +201,7 @@ class Api {
                         })
                     })
                     .catch(() => {
+                        console.log("socket failed login")
                         socket.disconnect()
                     })
             })

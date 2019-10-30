@@ -6,6 +6,7 @@ const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
 const Game         = require('./models/Game')
 
+
 dotenv.config()
 
 mongoose.connect(
@@ -25,7 +26,8 @@ const app = express()
     .use(helmet())
     //.use(cors())
     .use(auth.authenticate)
-    
+
+const server = require('http').createServer(app)    
 
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
@@ -104,8 +106,8 @@ app.get("/", async (req, res) => {
 })
 
 let api = require('./models/api')
-let io = new api(app, auth)
+let io = new api(server, auth)
 
-app.listen(process.env.PORT, () => {
+server.listen(process.env.PORT, () => {
     console.log(`[app] Listening at localhost:${process.env.PORT}`)
 })
