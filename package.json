@@ -32,6 +32,7 @@
     "socket.io": "^2.3.0",
     "uuid": "^3.3.3",
     "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
     "gulp-nodemon": "^2.4.2",
     "gulp-sass": "^4.0.2",
     "node-sass": "^4.12.0",
