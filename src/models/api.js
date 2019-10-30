@@ -160,7 +160,6 @@ class Api {
                 auth.login(username, password)
                     .then((session) => {
                         let board = new Board()
-                        console.log("socket logged in")
 
                         socket.emit('turn', JSON.stringify({
                             score: board.score,
@@ -182,16 +181,12 @@ class Api {
                                 })
                                 game.save()
 
-                                console.log("socket done")
-
                                 socket.emit('end', JSON.stringify({
                                     score: board.score,
                                     board: board.board
                                 }) )
                                 socket.disconnect(true)
                             } else {
-                                console.log("socket turn")
-
                                 socket.emit('turn', JSON.stringify({
                                     successfulMove: move,
                                     score: board.score,
