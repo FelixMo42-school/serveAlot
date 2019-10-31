@@ -20,14 +20,12 @@ class Auth {
                 next()
             })
             .catch(err => {
-                req.user = false
                 next()
             })
     }
 
-    login(username, password) {
+    getUser(username, password) {
         return new Promise(async (resolve, reject) => {
-            console.log(username, password)
             let user = await User.findOne({username})
             if (!user) {
                 return reject("user dosent exist")
@@ -38,7 +36,27 @@ class Auth {
                 return reject("invalid password")
             }
 
-            let sessionId = uuid() //TODO: sign it!
+            resolve(user)
+        })
+    }
+
+    confirmPassword(user, password) {
+        return user.checkPassword(password)
+    }
+
+    login(username, password) {
+        return new Promise(async (resolve, reject) => {
+            let user = await this.getUser(username, password)
+                .then(user => {
+                    return user
+                })
+                .catch(err => {
+                    reject(err)
+                })
+
+            if (!user) {return}
+
+            let sessionId = uuid()
             let session = new Session({sessionId, user: user._id})
             session.save()
                 .then(() => {
@@ -59,7 +77,7 @@ class Auth {
             let user = new User({username, password})
             user.save()
                 .then(() => {
-                    let sessionId = uuid() //TODO: sign it!
+                    let sessionId = uuid()
                     let session = new Session({
                         sessionId: sessionId,
                         user: user._id
@@ -75,6 +93,23 @@ class Auth {
                 .catch(err => {
                     reject(err)
                 })
+        })
+    }
+
+    updatePassword(session, newPassword, oldPassword) {
+        return new Promise(async (resolve, reject) => {
+            if ( await this.confirmPassword( session.user, oldPassword ) ) {
+                session.user.password = newPassword
+                session.user.save()
+                    .then(() => {
+                        resolve()
+                    })
+                    .catch((err) => {
+                        reject(err)
+                    })
+            } else {
+                reject("wrong password")
+            }
         })
     }
 

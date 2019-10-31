@@ -4,8 +4,7 @@ const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
-//const compression  = require("compression")
-
+const compression  = require("compression")
 
 dotenv.config()
 
@@ -22,7 +21,7 @@ const auth = new Auth()
 
 const app = express()
     .set('view engine', 'ejs')
-    //.use(compression)
+    .use(compression())
     .use(express.static('public'))
     .use(bodyParser.urlencoded({extended: true}))
     .use(cookieParser( process.env.SECRET ))
@@ -36,7 +35,7 @@ const io   = new api(server, auth)
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
         title: "login",
-        user: req.user,
+        session: req.session,
         parts: [
             {name: "login"}
         ]
@@ -56,7 +55,7 @@ app.post("/login", async (req, res) => {
         .catch((error) => {
             res.render("pages/root", {
                 title: "login",
-                user: req.user,
+                session: req.session,
                 parts: [
                     {name: "alert", level: "danger", msg: error},
                     {name: "login"}
@@ -77,7 +76,7 @@ app.post("/register", async (req, res) => {
         .catch((error) => {
             res.render("pages/root", {
                 title: "login",
-                user: req.user,
+                session: req.session,
                 parts: [
                     {name: "alert", level: "danger", msg: error},
                     {name: "login"}
@@ -105,9 +104,64 @@ app.get("/", async (req, res) => {
 
     res.render("pages/root", {
         title: "home",
-        user: req.user,
+        session: req.session,
         parts: parts
     })
+})
+
+const updatePasswordForm = {
+    name: "form",
+    action: "/updatePassword",
+    method: "POST",
+    inputs: [
+        {
+            name: "new_password",
+            question: "new password",
+            placeholder: "new password",
+            type: "password"
+        },
+        {
+            name: "old_password",
+            question: "old password",
+            placeholder: "old password",
+            type: "password"
+        }
+    ]
+}
+
+app.get("/profile", async (req, res) => {
+    if ( !req.session ) { return res.status(403).redirect("/") }
+
+    res.render("pages/root", {
+        title: "profile",
+        session: req.session,
+        parts: [
+            updatePasswordForm
+        ]
+    })
+})
+
+app.post("/updatePassword", async (req, res) => {
+    if ( !req.session ) { return res.status(403).redirect("/") }
+
+    auth.updatePassword(
+        req.session,
+        req.body.new_password,
+        req.body.old_password,
+    )
+        .then(() => {
+            res.redirect("/")
+        })
+        .catch(error => {
+            es.render("pages/root", {
+                title: "profile",
+                session: req.session,
+                parts: [
+                    {name: "alert", level: "danger", msg: error},
+                    updatePasswordForm
+                ]
+            })
+        })
 })
 
 server.listen(process.env.PORT, () => {
