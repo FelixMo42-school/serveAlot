@@ -4,7 +4,7 @@ const cookieParser = require('cookie-parser')
 const helmet       = require('helmet')
 const mongoose     = require('mongoose')
 const dotenv       = require('dotenv')
-const Game         = require('./models/Game')
+//const compression  = require("compression")
 
 
 dotenv.config()
@@ -15,19 +15,23 @@ mongoose.connect(
 )
 
 const Auth = require('./models/Auth')
+const Game = require('./models/Game')
+const api  = require('./models/api')
+
 const auth = new Auth()
 
 const app = express()
     .set('view engine', 'ejs')
+    //.use(compression)
     .use(express.static('public'))
-    //.use(bodyParser.json({}))
     .use(bodyParser.urlencoded({extended: true}))
     .use(cookieParser( process.env.SECRET ))
     .use(helmet())
-    //.use(cors())
     .use(auth.authenticate)
 
-const server = require('http').createServer(app)    
+const server = require('http').createServer(app)  
+
+const io   = new api(server, auth)
 
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
@@ -48,6 +52,7 @@ app.post("/login", async (req, res) => {
             res.cookie('session', session.sessionId, { httpOnly: true, signed: true }) // do secure once https
             res.redirect("/")
         })
+
         .catch((error) => {
             res.render("pages/root", {
                 title: "login",
@@ -104,9 +109,6 @@ app.get("/", async (req, res) => {
         parts: parts
     })
 })
-
-let api = require('./models/api')
-let io = new api(server, auth)
 
 server.listen(process.env.PORT, () => {
     console.log(`[app] Listening at localhost:${process.env.PORT}`)
