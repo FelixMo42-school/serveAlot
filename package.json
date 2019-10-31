@@ -30,7 +30,6 @@
     "gulp": "^4.0.2",
     "gulp-autoprefixer": "^7.0.1",
     "gulp-exec": "^4.0.0",
-    "gulp-live-server": "0.0.31",
     "gulp-nodemon": "^2.4.2",
     "gulp-sass": "^4.0.2",
     "helmet": "^3.21.1",
