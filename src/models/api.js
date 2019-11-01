@@ -7,6 +7,7 @@ class Board {
         this.tiles = []
         this.merged = []
         this.score = 0
+        this.turn = 0
 
         for (let x = 0; x < 4; x++) {
             this.board[x] = []
@@ -108,6 +109,7 @@ class Board {
 
         if (move) {
             this.addRandomTile()
+            this.turn += 1
         }
 
         return move
@@ -145,6 +147,20 @@ class Board {
 
         return true
     }
+
+    getHighest() {
+        let max = 0
+
+        for (var x = 0; x < 4; x++) {
+            for (var y = 0; y < 4; y++) {
+                if ( this.getTile(x, y) > max ) {
+                    max = this.getTile(x, y)
+                }
+            }
+        }
+
+        return max
+    }
 }
 
 class Api {
@@ -154,11 +170,12 @@ class Api {
             .on('connection', (socket) => {
                 let username = socket.handshake.headers.username
                 let password = socket.handshake.headers.password
+                let name     = socket.handshake.headers.name
 
-                console.log("socket resived")
+                console.log(name)
 
-                auth.login(username, password)
-                    .then((session) => {
+                auth.getUser(username, password)
+                    .then(user => {
                         let board = new Board()
 
                         socket.emit('turn', JSON.stringify({
@@ -176,7 +193,10 @@ class Api {
         
                             if ( board.gameOver() ) {
                                 let game = new Game({
-                                    user: session.user,
+                                    user: user,
+                                    name: name,
+                                    turns: board.turn,
+                                    highestTile: board.getHighest(),
                                     score: board.score
                                 })
                                 game.save()
@@ -195,9 +215,9 @@ class Api {
                             }
                         })
                     })
-                    .catch(() => {
-                        console.log("socket failed login")
-                        socket.disconnect()
+                    .catch(err => {
+                        socket.emit('login_failed', err)
+                        socket.disconnect(true)
                     })
             })
     }

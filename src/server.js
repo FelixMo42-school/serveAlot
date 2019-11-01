@@ -30,7 +30,7 @@ const app = express()
 
 const server = require('http').createServer(app)  
 
-const io   = new api(server, auth)
+const io = new api(server, auth)
 
 app.get("/login", async (req, res) => {
     res.render("pages/root", {
@@ -48,7 +48,11 @@ app.post("/login", async (req, res) => {
 
     auth.login(username, password)
         .then((session) => {
-            res.cookie('session', session.sessionId, { httpOnly: true, signed: true }) // do secure once https
+            res.cookie(
+                'session',
+                session.sessionId,
+                { httpOnly: true, signed: true }
+            ) // do secure once https
             res.redirect("/")
         })
 
@@ -70,7 +74,11 @@ app.post("/register", async (req, res) => {
 
     auth.register(username, password)
         .then((session) => {
-            res.cookie('session', session.sessionId, { httpOnly: true, signed: true }) // do secure once https
+            res.cookie(
+                'session',
+                session.sessionId,
+                { httpOnly: true, signed: true }
+            ) // do secure once https
             res.redirect("/")
         })
         .catch((error) => {
@@ -99,7 +107,7 @@ app.get("/", async (req, res) => {
 
     parts.push({
         name: "home",
-        games: await Game.find().populate('user')
+        games: await Game.find().limit(100).populate('user')
     })
 
     res.render("pages/root", {

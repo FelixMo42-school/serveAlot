@@ -5,15 +5,21 @@
     >
         <thead>
             <tr>
-                <th class="th-sm">user</th>
+                <th>user</th>
+                <th>name</th>
                 <th>score</th>
+                <th>turns</th>
+                <th>highest tile</th>
             </tr>
         </thead>
         <tbody>
             <% for (let game of games) { %>
                 <tr>
                     <td><%- game.user.username %></td>
+                    <td><%- game.name %></td>
                     <td><%- game.score %></td>
+                    <td><%- game.turns %></td>
+                    <td><%- game.highestTile %></td>
                 </tr>
             <% } %>
         </tbody>
@@ -21,7 +27,7 @@
 
     <hr>
 
-    <p>To play the game clone <a href="https://github.com/berkeleyhackclub/HackGame">this</a>.</p>
+    <p>To play the game clone <a href="https://github.com/berkeleyhackclub/HackGame">this</a> repository.</p>
 </div>
 
 
@@ -32,6 +38,8 @@
 
 <script>
     $(document).ready(function () {
-        $('#gamesTable').DataTable()
+        $('#gamesTable').DataTable({
+            "order": [[2, "desc" ], [3, "asc" ]]
+        })
     })
 </script>

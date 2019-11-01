@@ -6,7 +6,18 @@ const gameSchema = new mongoose.Schema({
         ref: "user",
         required: true
     },
+    name: {
+        type: String
+    },
     score: {
+        type: Number,
+        required: true
+    },
+    turns: {
+        type: Number,
+        required: true
+    },
+    highestTile: {
         type: Number,
         required: true
     },
