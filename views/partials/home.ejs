@@ -10,6 +10,7 @@
                 <th>score</th>
                 <th>turns</th>
                 <th>highest tile</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -20,6 +21,9 @@
                     <td><%- game.score %></td>
                     <td><%- game.turns %></td>
                     <td><%- game.highestTile %></td>
+                    <td><button type="button" class="btn btn-default btn-sm">
+                        <span class="glyphicon glyphicon-trash"></span> Trash 
+                      </button></td>
                 </tr>
             <% } %>
         </tbody>
@@ -39,7 +43,17 @@
 <script>
     $(document).ready(function () {
         $('#gamesTable').DataTable({
-            "order": [[2, "desc" ], [3, "asc" ]]
+            "order": [[2, "desc" ], [3, "asc" ]],
+            'aoColumns': [
+                null,
+                null,
+                null,
+                null,
+                null,
+                {
+                    'bSortable': false
+                }
+            ]
         })
     })
 </script>
