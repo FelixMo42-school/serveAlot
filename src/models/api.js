@@ -135,7 +135,7 @@ class Board {
 
         for (var x = 0; x < 4; x++) {
             for (var y = 0; y < 4; y++) {
-                for (let [dx, dy] in [[0,1],[1,0],[0,-1],[-1,0]]) {
+                for (let [dx, dy] of [[0,1],[1,0],[0,-1],[-1,0]]) {
                     if (!this.inRange(x + dx, y + dy)) { continue }
 
                     if (this.getTile(x, y) == this.getTile(x + dx, y + dy)) {
