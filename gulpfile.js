@@ -41,12 +41,28 @@ gulp.task("sass:build", async () =>
 
 gulp.task("sass", gulp.series("sass:build", "sass:watch"))
 
+// fontawsome
+
+gulp.task('fontawsome:fonts', function() {
+    return gulp.src('./node_modules/@fortawesome/fontawesome-free/webfonts/*').pipe(gulp.dest('./public/fonts'))
+})
+
+gulp.task('fontawsome:sprites', function() {
+    return gulp.src('./node_modules/@fortawesome/fontawesome-free/sprites/*').pipe(gulp.dest('./public/sprites'))
+})
+
+gulp.task('fontawsome:svgs', function() {
+    return gulp.src('./node_modules/@fortawesome/fontawesome-free/svgs/*').pipe(gulp.dest('./public/svgs'))
+})
+
+gulp.task('fontawsome', gulp.series("fontawsome:fonts", "fontawsome:sprites", "fontawsome:svgs"))
+
 // npm task
 
-gulp.task("build", gulp.series("sass:build"))
+gulp.task("build", gulp.series("sass:build", "fontawsome"))
 
 gulp.task("start",
     process.env.NODE_ENV  === "production" ?
         gulp.series("build", "server:production") :
-        gulp.series("sass",  "server:development")
+        gulp.series("sass",  "fontawsome", "server:development")
 )

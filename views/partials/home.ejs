@@ -10,7 +10,6 @@
                 <th>score</th>
                 <th>turns</th>
                 <th>highest tile</th>
-                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -20,10 +19,9 @@
                     <td><%- game.name %></td>
                     <td><%- game.score %></td>
                     <td><%- game.turns %></td>
-                    <td><%- game.highestTile %></td>
-                    <td><button type="button" class="btn btn-default btn-sm">
-                        <span class="glyphicon glyphicon-trash"></span> Trash 
-                      </button></td>
+                    <td><%- game.highestTile %>
+                        <i  style="float: right;" class="fas fa-trash"></i>
+                    </td>
                 </tr>
             <% } %>
         </tbody>
@@ -49,10 +47,7 @@
                 null,
                 null,
                 null,
-                null,
-                {
-                    'bSortable': false
-                }
+                null
             ]
         })
     })
