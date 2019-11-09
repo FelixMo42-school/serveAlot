@@ -55,7 +55,9 @@
 
         // tell the server to delete it
         $.ajax({
-            
+            url: "/deleteGame",
+            method: "POST",
+            data: { id: id }
         })
     }
 

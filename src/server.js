@@ -172,6 +172,19 @@ app.post("/updatePassword", async (req, res) => {
         })
 })
 
+app.post("/deleteGame", async (req, res) => {
+    if ( !req.session ) { return res.status(403).send("no") }
+
+    await Game.deleteOne({
+        user: req.session.user.id,
+        _id: req.body.id
+    }).catch(() => {
+        res.send("fail")
+    }).then(() => {
+        res.send("suc")
+    })
+})
+
 server.listen(process.env.PORT, () => {
     console.log(`[app] Listening at localhost:${process.env.PORT}`)
 })
