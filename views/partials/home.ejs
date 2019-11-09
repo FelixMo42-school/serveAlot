@@ -14,12 +14,20 @@
         </thead>
         <tbody>
             <% for (let game of games) { %>
-                <tr>
+                <tr id="<%- game.id %>">
                     <td><%- game.user.username %></td>
                     <td><%- game.name %></td>
                     <td><%- game.score %></td>
                     <td><%- game.turns %></td>
-                    <td><%- game.highestTile %></td>
+                    <td><%- game.highestTile %>
+                        <% if ( session && session.user.id == game.user.id ) { %>
+                            <i
+                                style="float: right; padding-top: 4px; cursor: pointer;"
+                                class="fas fa-trash"
+                                onclick="deleteGame('<%- game.id %>')">
+                            </i>
+                        <% } %>
+                    </td>
                 </tr>
             <% } %>
         </tbody>
@@ -37,8 +45,24 @@
 ></script>
 
 <script>
+    let table;
+
+    function deleteGame(id) {
+        // clear it from the table
+        let page = table.page()
+        table.row(document.getElementById(id)).remove().draw()
+        table.page(page).draw(false)
+
+        // tell the server to delete it
+        $.ajax({
+            url: "/deleteGame",
+            method: "POST",
+            data: { id: id }
+        })
+    }
+
     $(document).ready(function () {
-        $('#gamesTable').DataTable({
+        table = $('#gamesTable').DataTable({
             "order": [[2, "desc" ], [3, "asc" ]]
         })
     })

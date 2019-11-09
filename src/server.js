@@ -107,7 +107,7 @@ app.get("/", async (req, res) => {
 
     parts.push({
         name: "home",
-        games: await Game.find().limit(100).populate('user')
+        games: await Game.find().sort([["score", 1]]).limit(100).populate('user')
     })
 
     res.render("pages/root", {
@@ -170,6 +170,19 @@ app.post("/updatePassword", async (req, res) => {
                 ]
             })
         })
+})
+
+app.post("/deleteGame", async (req, res) => {
+    if ( !req.session ) { return res.status(403).send("no") }
+
+    await Game.deleteOne({
+        user: req.session.user.id,
+        _id: req.body.id
+    }).catch(() => {
+        res.send("fail")
+    }).then(() => {
+        res.send("suc")
+    })
 })
 
 server.listen(process.env.PORT, () => {

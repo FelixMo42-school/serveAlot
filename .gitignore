@@ -65,4 +65,4 @@ typings/
 *.key
 
 # build files
-public/css/
+public/
