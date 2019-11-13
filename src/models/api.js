@@ -172,8 +172,6 @@ class Api {
                 let password = socket.handshake.headers.password
                 let name     = socket.handshake.headers.name
 
-                console.log(name)
-
                 auth.getUser(username, password)
                     .then(user => {
                         let board = new Board()
@@ -193,7 +191,7 @@ class Api {
         
                             if ( board.gameOver() ) {
                                 let game = new Game({
-                                    user: user,
+                                    user: user.id,
                                     name: name,
                                     turns: board.turn,
                                     highestTile: board.getHighest(),
