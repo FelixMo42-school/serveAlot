@@ -198,6 +198,12 @@ class Api {
                                     score: board.score
                                 })
                                 game.save()
+                                    .then(() => {
+
+                                    })
+                                    .catch((err) => {
+                                        console.log(err)
+                                    })
 
                                 socket.emit('end', JSON.stringify({
                                     score: board.score,
