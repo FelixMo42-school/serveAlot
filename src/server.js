@@ -107,7 +107,7 @@ app.get("/", async (req, res) => {
 
     parts.push({
         name: "home",
-        games: await Game.find().sort([["score", 1]]).limit(100).populate('user')
+        games: await Game.find().sort([["score", -1]]).limit(100).populate('user')
     })
 
     res.render("pages/root", {
