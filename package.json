@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/FelixMo42-school/serveAlot#readme",
   "dependencies": {
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "bootstrap": "^4.3.1",
     "compression": "^1.7.4",
